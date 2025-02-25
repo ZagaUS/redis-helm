@@ -1,0 +1,55 @@
+replicaCount: 1
+
+image:
+  repository: quay.io/zagaos/zagaobserve-redis-query
+  tag: "v6"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8000
+
+route:
+  enabled: true
+  subdomain: redis-backend
+  # host: my-app.example.com
+
+## Container Environment Variables
+env:
+  - name: REDIS_HOST
+    value: "localhost"  
+  - name: REDIS_PORT
+    value: "6379"
+  - name: REDIS_METRICS_CHANNEL
+    value: "metrics"
+  - name: REDIS_TRACES_CHANNEL
+    value: "traces"
+  - name: REDIS_LOGS_CHANNEL
+    value: "logs"
+
+configmapEnv:
+  data:
+    REDIS_HOST: "localhost"
+    REDIS_PORT: "6379"
+    REDIS_METRICS_CHANNEL: "metrics"
+    REDIS_TRACES_CHANNEL: "traces"
+    REDIS_LOGS_CHANNEL: "logs"
+
+  livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+backend:
+  enabled: true 
+dashboard:
+  enabled: true # Set to false if you don't want to deploy casemgt-dashboard
